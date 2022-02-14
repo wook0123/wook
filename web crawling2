@@ -1,0 +1,67 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
+from openpyxl import Workbook
+from datetime import date
+
+date = date.today()
+
+url = 'https://finance.naver.com/sise/sise_rise.naver?sosok=0'
+
+driver = webdriver.Chrome()
+driver.get(url)
+driver.implicitly_wait(3)
+def drfi(driver):
+    driver.find_element(By.ID, 'option2').click()
+    driver.find_element(By.ID, 'option8').click()
+    driver.find_element(By.ID, 'option14').click()
+    driver.find_element(By.ID, 'option20').click()
+    driver.find_element(By.ID, 'option4').click()
+    driver.find_element(By.ID, 'option5').click()
+    driver.find_element(By.ID, 'option17').click()
+    driver.find_element(By.ID, 'option24').click()
+    driver.find_element(By.CSS_SELECTOR, '#contentarea_left > div.box_type_m > form > div > div > div > a').click()
+
+drfi(driver)
+
+html = driver.page_source
+soup = BeautifulSoup(html, 'html.parser')
+source = soup.select('#contentarea > div.box_type_l > table > tbody > tr')
+
+
+write_wb = Workbook()
+write_ws = write_wb.create_sheet('코스피')
+
+for n in source:
+    data = []
+    for j in n:
+        trs = j.text.strip()
+        data.append(trs)
+    write_ws.append(data)
+
+driver.close()
+
+url1 = 'https://finance.naver.com/sise/sise_rise.naver?sosok=1'
+
+driver1 = webdriver.Chrome()
+driver1.get(url1)
+drfi(driver1)
+driver1.implicitly_wait(3)
+
+html1 = driver1.page_source
+soup1 = BeautifulSoup(html1, 'html.parser')
+source1 = soup1.select('#contentarea > div.box_type_l > table > tbody > tr')
+
+write_ws1 = write_wb.create_sheet('코스닥')
+
+for a in source1:
+    data1 = []
+    for b in a:
+        trs = b.text.strip()
+        data1.append(trs)
+    write_ws1.append(data1)
+
+
+write_wb.save(r"C:\Users\USER\PycharmProjects\PythonProject4/연습5.xlsx")
+
+driver1.close()
